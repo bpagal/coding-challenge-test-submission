@@ -10,6 +10,7 @@ import { Address as AddressType } from './types';
 import { useAddressFormValues } from '@/hooks/useAddressFormValues';
 import Form from '@/components/Form/Form';
 import transformAddress from './core/models/address';
+import ErrorMessage from '@/components/ErrorMessage/ErrorMessage';
 
 const BASE_API_URL = `${process.env.NEXT_PUBLIC_URL}/api`;
 
@@ -164,8 +165,7 @@ function App() {
           />
         )}
 
-        {/* TODO: Create an <ErrorMessage /> component for displaying an error message */}
-        {error && <div className="error">{error}</div>}
+        {error && <ErrorMessage message={error} />}
 
         {/* TODO: Add a button to clear all form fields. 
         Button must look different from the default primary button, see design. 
