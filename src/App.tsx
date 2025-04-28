@@ -2,15 +2,15 @@ import React from 'react';
 
 import Address from '@/components/Address/Address';
 import AddressBook from '@/components/AddressBook/AddressBook';
-import Button from '@/components/Button/Button';
-import InputText from '@/components/InputText/InputText';
 import Radio from '@/components/Radio/Radio';
 import Section from '@/components/Section/Section';
 import useAddressBook from '@/hooks/useAddressBook';
 
-import styles from './App.module.css';
 import { Address as AddressType } from './types';
 import { useAddressFormValues } from '@/hooks/useAddressFormValues';
+import Form from '@/components/Form/Form';
+
+const BASE_API_URL = `${process.env.NEXT_PUBLIC_URL}/api`;
 
 function App() {
   const { formValues, handleFormValueChange } = useAddressFormValues();
@@ -42,7 +42,7 @@ function App() {
 
     const { postcode, houseNumber } = formValues;
     const res = await fetch(
-      `api/getAddresses?postcode=${postcode}&streetnumber=${houseNumber}`,
+      `${BASE_API_URL}/getAddresses?postcode=${postcode}&streetnumber=${houseNumber}`,
     );
     const data = await res.json();
     setAddresses(data.details);
@@ -52,7 +52,7 @@ function App() {
   /** TODO: Add basic validation to ensure first name and last name fields aren't empty
    * Use the following error message setError("First name and last name fields mandatory!")
    */
-  const handlePersonSubmit = (e: React.ChangeEvent<HTMLFormElement>) => {
+  const handlePersonSubmit = async (e: React.ChangeEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     if (!selectedAddress || !addresses.length) {
@@ -88,29 +88,30 @@ function App() {
             Enter an address by postcode add personal info and done! 👏
           </small>
         </h1>
-        {/* TODO: Create generic <Form /> component to display form rows, legend and a submit button  */}
-        <form onSubmit={handleAddressSubmit}>
-          <fieldset>
-            <legend>🏠 Find an address</legend>
-            <div className={styles.formRow}>
-              <InputText
-                name="postCode"
-                onChange={handleFormValueChange('postcode')}
-                placeholder="Post Code"
-                value={formValues.postcode}
-              />
-            </div>
-            <div className={styles.formRow}>
-              <InputText
-                name="houseNumber"
-                onChange={handleFormValueChange('houseNumber')}
-                placeholder="House number"
-                value={formValues.houseNumber}
-              />
-            </div>
-            <Button type="submit">Find</Button>
-          </fieldset>
-        </form>
+        <Form
+          label={'🏠 Find an address'}
+          loading={true}
+          formEntries={[
+            {
+              name: 'postCode',
+              placeholder: 'Post Code',
+              extraProps: {
+                value: formValues.postcode,
+                onChange: handleFormValueChange('postcode'),
+              },
+            },
+            {
+              name: 'houseNumber',
+              placeholder: 'House number',
+              extraProps: {
+                value: formValues.houseNumber,
+                onChange: handleFormValueChange('houseNumber'),
+              },
+            },
+          ]}
+          onFormSubmit={handleAddressSubmit}
+          submitText={'Find'}
+        />
         {addresses.length > 0 &&
           addresses.map((address) => {
             return (
@@ -126,28 +127,30 @@ function App() {
           })}
         {/* TODO: Create generic <Form /> component to display form rows, legend and a submit button  */}
         {selectedAddress && (
-          <form onSubmit={handlePersonSubmit}>
-            <fieldset>
-              <legend>✏️ Add personal info to address</legend>
-              <div className={styles.formRow}>
-                <InputText
-                  name="firstName"
-                  placeholder="First name"
-                  onChange={handleFormValueChange('firstName')}
-                  value={formValues.firstName}
-                />
-              </div>
-              <div className={styles.formRow}>
-                <InputText
-                  name="lastName"
-                  placeholder="Last name"
-                  onChange={handleFormValueChange('lastName')}
-                  value={formValues.lastName}
-                />
-              </div>
-              <Button type="submit">Add to addressbook</Button>
-            </fieldset>
-          </form>
+          <Form
+            label={'✏️ Add personal info to address'}
+            loading={true}
+            formEntries={[
+              {
+                name: 'firstName',
+                placeholder: 'First name',
+                extraProps: {
+                  onChange: handleFormValueChange('firstName'),
+                  value: formValues.firstName,
+                },
+              },
+              {
+                name: 'lastName',
+                placeholder: 'Last name',
+                extraProps: {
+                  onChange: handleFormValueChange('lastName'),
+                  value: formValues.lastName,
+                },
+              },
+            ]}
+            onFormSubmit={handlePersonSubmit}
+            submitText={'Add to addressbook'}
+          />
         )}
 
         {/* TODO: Create an <ErrorMessage /> component for displaying an error message */}

@@ -1,12 +1,13 @@
-import React, { FunctionComponent } from "react";
+import React, { FunctionComponent } from 'react';
 
-import $ from "./InputText.module.css";
+import $ from './InputText.module.css';
 
-interface InputTextProps {
+export interface InputTextProps {
   name: string;
   placeholder: string;
   value: string;
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  extraProps: React.InputHTMLAttributes<HTMLInputElement>;
 }
 
 const InputText: FunctionComponent<InputTextProps> = ({
@@ -14,6 +15,7 @@ const InputText: FunctionComponent<InputTextProps> = ({
   onChange,
   placeholder,
   value,
+  extraProps,
 }) => {
   return (
     <input
@@ -24,6 +26,7 @@ const InputText: FunctionComponent<InputTextProps> = ({
       placeholder={placeholder}
       type="text"
       value={value}
+      {...extraProps}
     />
   );
 };
