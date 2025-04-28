@@ -1,58 +1,30 @@
-import React from "react";
+import React from 'react';
 
-import Address from "@/components/Address/Address";
-import AddressBook from "@/components/AddressBook/AddressBook";
-import Button from "@/components/Button/Button";
-import InputText from "@/components/InputText/InputText";
-import Radio from "@/components/Radio/Radio";
-import Section from "@/components/Section/Section";
-import useAddressBook from "@/hooks/useAddressBook";
+import Address from '@/components/Address/Address';
+import AddressBook from '@/components/AddressBook/AddressBook';
+import Button from '@/components/Button/Button';
+import InputText from '@/components/InputText/InputText';
+import Radio from '@/components/Radio/Radio';
+import Section from '@/components/Section/Section';
+import useAddressBook from '@/hooks/useAddressBook';
 
-import styles from "./App.module.css";
-import { Address as AddressType } from "./types";
+import styles from './App.module.css';
+import { Address as AddressType } from './types';
+import { useAddressFormValues } from '@/hooks/useAddressFormValues';
 
 function App() {
-  /**
-   * Form fields states
-   * TODO: Write a custom hook to set form fields in a more generic way:
-   * - Hook must expose an onChange handler to be used by all <InputText /> and <Radio /> components
-   * - Hook must expose all text form field values, like so: { postCode: '', houseNumber: '', ...etc }
-   * - Remove all individual React.useState
-   * - Remove all individual onChange handlers, like handlePostCodeChange for example
-   */
-  const [postCode, setPostCode] = React.useState("");
-  const [houseNumber, setHouseNumber] = React.useState("");
-  const [firstName, setFirstName] = React.useState("");
-  const [lastName, setLastName] = React.useState("");
-  const [selectedAddress, setSelectedAddress] = React.useState("");
+  const { formValues, handleFormValueChange } = useAddressFormValues();
+
   /**
    * Results states
    */
   const [error, setError] = React.useState<undefined | string>(undefined);
   const [addresses, setAddresses] = React.useState<AddressType[]>([]);
+
   /**
    * Redux actions
    */
   const { addAddress } = useAddressBook();
-
-  /**
-   * Text fields onChange handlers
-   */
-  const handlePostCodeChange = (e: React.ChangeEvent<HTMLInputElement>) =>
-    setPostCode(e.target.value);
-
-  const handleHouseNumberChange = (e: React.ChangeEvent<HTMLInputElement>) =>
-    setHouseNumber(e.target.value);
-
-  const handleFirstNameChange = (e: React.ChangeEvent<HTMLInputElement>) =>
-    setFirstName(e.target.value);
-
-  const handleLastNameChange = (e: React.ChangeEvent<HTMLInputElement>) =>
-    setLastName(e.target.value);
-
-  const handleSelectedAddressChange = (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => setSelectedAddress(e.target.value);
 
   /** TODO: Fetch addresses based on houseNumber and postCode using the local BE api
    * - Example URL of API: ${process.env.NEXT_PUBLIC_URL}/api/getAddresses?postcode=1345&streetnumber=350
@@ -63,9 +35,19 @@ function App() {
    * - Ensure to clear previous search results on each click
    * - Bonus: Add a loading state in the UI while fetching addresses
    */
-  const handleAddressSubmit = async (e: React.ChangeEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const handleAddressSubmit = async (
+    event: React.ChangeEvent<HTMLFormElement>,
+  ) => {
+    event.preventDefault();
+
+    const { postcode, houseNumber } = formValues;
+    const res = await fetch(
+      `api/getAddresses?postcode=${postcode}&streetnumber=${houseNumber}`,
+    );
+    const data = await res.json();
+    setAddresses(data.details);
   };
+  const { selectedAddress } = formValues;
 
   /** TODO: Add basic validation to ensure first name and last name fields aren't empty
    * Use the following error message setError("First name and last name fields mandatory!")
@@ -75,21 +57,25 @@ function App() {
 
     if (!selectedAddress || !addresses.length) {
       setError(
-        "No address selected, try to select an address or find one if you haven't"
+        "No address selected, try to select an address or find one if you haven't",
       );
       return;
     }
 
     const foundAddress = addresses.find(
-      (address) => address.id === selectedAddress
+      (address) => address.id === selectedAddress,
     );
 
     if (!foundAddress) {
-      setError("Selected address not found");
+      setError('Selected address not found');
       return;
     }
 
-    addAddress({ ...foundAddress, firstName, lastName });
+    addAddress({
+      ...foundAddress,
+      firstName: formValues.firstName,
+      lastName: formValues.lastName,
+    });
   };
 
   return (
@@ -109,17 +95,17 @@ function App() {
             <div className={styles.formRow}>
               <InputText
                 name="postCode"
-                onChange={handlePostCodeChange}
+                onChange={handleFormValueChange('postcode')}
                 placeholder="Post Code"
-                value={postCode}
+                value={formValues.postcode}
               />
             </div>
             <div className={styles.formRow}>
               <InputText
                 name="houseNumber"
-                onChange={handleHouseNumberChange}
-                value={houseNumber}
+                onChange={handleFormValueChange('houseNumber')}
                 placeholder="House number"
+                value={formValues.houseNumber}
               />
             </div>
             <Button type="submit">Find</Button>
@@ -132,7 +118,7 @@ function App() {
                 name="selectedAddress"
                 id={address.id}
                 key={address.id}
-                onChange={handleSelectedAddressChange}
+                onChange={handleFormValueChange('selectedAddress')}
               >
                 <Address {...address} />
               </Radio>
@@ -147,16 +133,16 @@ function App() {
                 <InputText
                   name="firstName"
                   placeholder="First name"
-                  onChange={handleFirstNameChange}
-                  value={firstName}
+                  onChange={handleFormValueChange('firstName')}
+                  value={formValues.firstName}
                 />
               </div>
               <div className={styles.formRow}>
                 <InputText
                   name="lastName"
                   placeholder="Last name"
-                  onChange={handleLastNameChange}
-                  value={lastName}
+                  onChange={handleFormValueChange('lastName')}
+                  value={formValues.lastName}
                 />
               </div>
               <Button type="submit">Add to addressbook</Button>
