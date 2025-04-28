@@ -29,6 +29,7 @@ code {
   --width-input: 20rem;
   --width-content: 30rem;
   --spacing-s: 8px;
+  --font-primary: 'Roboto', sans-serif;
 }
 
 * {
