@@ -6,13 +6,24 @@
 
 .remove {
   --color-brand: var(--color-accent);
-  margin-left: auto;
+  margin-left: 0;
 }
 
 .item {
   align-items: center;
   display: flex;
   gap: 1rem;
+  flex-direction: column;
+}
+
+@media (min-width: 350px) {
+  .item {
+    flex-direction: row;
+  }
+
+  .remove {
+    margin-left: auto;
+  }
 }
 
 .item address {
