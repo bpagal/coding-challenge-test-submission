@@ -20,6 +20,10 @@
   transform: scale(0.95);
 }
 
-/** TODO: Create separate styles for .primary and .secondary variants of this button:
-* - Must use the CSS variables declared in App.css
-*/
+.primary {
+  background: var(--color-brand);
+}
+
+.secondary {
+  background: var(--color-accent);
+}
