@@ -11,11 +11,13 @@ import { useAddressFormValues } from '@/hooks/useAddressFormValues';
 import Form from '@/components/Form/Form';
 import transformAddress from './core/models/address';
 import ErrorMessage from '@/components/ErrorMessage/ErrorMessage';
+import Button from '@/components/Button/Button';
 
 const BASE_API_URL = `${process.env.NEXT_PUBLIC_URL}/api`;
 
 function App() {
-  const { formValues, handleFormValueChange } = useAddressFormValues();
+  const { formValues, handleFormValueChange, resetFormValues } =
+    useAddressFormValues();
 
   /**
    * Results states
@@ -89,6 +91,12 @@ function App() {
       firstName: formValues.firstName,
       lastName: formValues.lastName,
     });
+  };
+
+  const handleClearClick = () => {
+    resetFormValues();
+    setAddresses([]);
+    setError(undefined);
   };
 
   return (
@@ -167,12 +175,14 @@ function App() {
 
         {error && <ErrorMessage message={error} />}
 
-        {/* TODO: Add a button to clear all form fields. 
-        Button must look different from the default primary button, see design. 
-        Button text name must be "Clear all fields"
-        On Click, it must clear all form fields, remove all search results and clear all prior
-        error messages
-        */}
+        <Button
+          loading={false}
+          type="button"
+          variant="secondary"
+          onClick={handleClearClick}
+        >
+          Clear all fields
+        </Button>
       </Section>
 
       <Section variant="dark">

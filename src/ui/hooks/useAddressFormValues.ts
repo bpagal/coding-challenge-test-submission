@@ -8,14 +8,16 @@ export type FormValues = Pick<
   selectedAddress: string;
 };
 
+const initialValues: FormValues = {
+  postcode: '',
+  houseNumber: '',
+  firstName: '',
+  lastName: '',
+  selectedAddress: '',
+};
+
 export const useAddressFormValues = () => {
-  const [formValues, setFormValues] = useState<FormValues>({
-    postcode: '',
-    houseNumber: '',
-    firstName: '',
-    lastName: '',
-    selectedAddress: '',
-  });
+  const [formValues, setFormValues] = useState<FormValues>(initialValues);
 
   const handleFormValueChange = (formName: keyof FormValues) => {
     return (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -26,8 +28,11 @@ export const useAddressFormValues = () => {
     };
   };
 
+  const resetFormValues = () => setFormValues(initialValues);
+
   return {
     formValues,
     handleFormValueChange,
+    resetFormValues,
   };
 };

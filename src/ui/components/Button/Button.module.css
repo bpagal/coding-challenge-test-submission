@@ -25,7 +25,9 @@
 }
 
 .secondary {
-  background: var(--color-accent);
+  background: var(--color-background);
+  color: var(--color-brand);
+  border-color: var(--color-brand);
 }
 
 .wrapper {
