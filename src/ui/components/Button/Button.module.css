@@ -27,3 +27,10 @@
 .secondary {
   background: var(--color-accent);
 }
+
+.wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-s);
+}

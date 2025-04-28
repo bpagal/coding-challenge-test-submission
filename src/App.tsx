@@ -9,6 +9,7 @@ import useAddressBook from '@/hooks/useAddressBook';
 import { Address as AddressType } from './types';
 import { useAddressFormValues } from '@/hooks/useAddressFormValues';
 import Form from '@/components/Form/Form';
+import transformAddress from './core/models/address';
 
 const BASE_API_URL = `${process.env.NEXT_PUBLIC_URL}/api`;
 
@@ -18,6 +19,9 @@ function App() {
   /**
    * Results states
    */
+  const [fetchAddressStatus, setFetchAddressStatus] = React.useState<
+    'idle' | 'loading' | 'error' | 'success'
+  >('idle');
   const [error, setError] = React.useState<undefined | string>(undefined);
   const [addresses, setAddresses] = React.useState<AddressType[]>([]);
 
@@ -26,26 +30,34 @@ function App() {
    */
   const { addAddress } = useAddressBook();
 
-  /** TODO: Fetch addresses based on houseNumber and postCode using the local BE api
-   * - Example URL of API: ${process.env.NEXT_PUBLIC_URL}/api/getAddresses?postcode=1345&streetnumber=350
-   * - Ensure you provide a BASE URL for api endpoint for grading purposes!
-   * - Handle errors if they occur
-   * - Handle successful response by updating the `addresses` in the state using `setAddresses`
-   * - Make sure to add the houseNumber to each found address in the response using `transformAddress()` function
-   * - Ensure to clear previous search results on each click
-   * - Bonus: Add a loading state in the UI while fetching addresses
-   */
   const handleAddressSubmit = async (
     event: React.ChangeEvent<HTMLFormElement>,
   ) => {
     event.preventDefault();
-
     const { postcode, houseNumber } = formValues;
-    const res = await fetch(
-      `${BASE_API_URL}/getAddresses?postcode=${postcode}&streetnumber=${houseNumber}`,
-    );
-    const data = await res.json();
-    setAddresses(data.details);
+
+    setAddresses([]);
+    setFetchAddressStatus('loading');
+    setError(undefined);
+
+    try {
+      const response = await fetch(
+        `${BASE_API_URL}/getAddresses?postcode=${postcode}&streetnumber=${houseNumber}`,
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        setFetchAddressStatus('error');
+        setError(errorData.errormessage);
+      }
+
+      const data = await response.json();
+      const newAddresses = data.details.map(transformAddress);
+      setAddresses(newAddresses);
+      setFetchAddressStatus('success');
+    } catch (err) {
+      console.error(err);
+    }
   };
   const { selectedAddress } = formValues;
 
@@ -90,7 +102,7 @@ function App() {
         </h1>
         <Form
           label={'🏠 Find an address'}
-          loading={true}
+          loading={fetchAddressStatus === 'loading'}
           formEntries={[
             {
               name: 'postCode',
@@ -125,11 +137,10 @@ function App() {
               </Radio>
             );
           })}
-        {/* TODO: Create generic <Form /> component to display form rows, legend and a submit button  */}
         {selectedAddress && (
           <Form
             label={'✏️ Add personal info to address'}
-            loading={true}
+            loading={false}
             formEntries={[
               {
                 name: 'firstName',
